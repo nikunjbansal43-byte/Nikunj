@@ -1,0 +1,519 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Dark Image Gallery</title>
+
+    <style>
+
+        /* Reset */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: Arial, Helvetica, sans-serif;
+            min-height: 100vh;
+
+            background:
+                radial-gradient(circle at top, #3b174f, #160c24 45%, #08050d);
+
+            color: white;
+        }
+
+
+        /* HEADER */
+
+        header {
+            text-align: center;
+            padding: 60px 20px 35px;
+        }
+
+        header h1 {
+            font-size: 48px;
+            letter-spacing: 3px;
+
+            background: linear-gradient(
+                90deg,
+                #ffffff,
+                #d99cff,
+                #ff74c8
+            );
+
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+
+            margin-bottom: 12px;
+        }
+
+        header p {
+            color: #cbbbd8;
+            font-size: 17px;
+        }
+
+
+        /* GALLERY CONTAINER */
+
+        .gallery {
+            width: 90%;
+            max-width: 1200px;
+
+            margin: 20px auto 80px;
+
+            display: grid;
+
+            grid-template-columns:
+                repeat(auto-fit, minmax(260px, 1fr));
+
+            gap: 25px;
+        }
+
+
+        /* IMAGE CARD */
+
+        .gallery-item {
+            position: relative;
+
+            height: 300px;
+
+            overflow: hidden;
+
+            border-radius: 18px;
+
+            border: 1px solid rgba(255,255,255,0.15);
+
+            box-shadow:
+                0 10px 30px rgba(0,0,0,0.5);
+
+            cursor: pointer;
+
+            transition: 0.4s;
+        }
+
+
+        .gallery-item:hover {
+            transform: translateY(-10px);
+
+            box-shadow:
+                0 20px 45px rgba(193, 90, 255, 0.35);
+        }
+
+
+        /* IMAGE */
+
+        .gallery-item img {
+            width: 100%;
+            height: 100%;
+
+            object-fit: cover;
+
+            transition: transform 0.6s ease;
+        }
+
+
+        .gallery-item:hover img {
+            transform: scale(1.12);
+        }
+
+
+        /* DARK OVERLAY */
+
+        .overlay {
+            position: absolute;
+
+            left: 0;
+            right: 0;
+            bottom: 0;
+
+            padding: 40px 20px 20px;
+
+            background:
+                linear-gradient(
+                    transparent,
+                    rgba(0,0,0,0.9)
+                );
+
+            transform: translateY(25px);
+
+            opacity: 0;
+
+            transition: 0.4s;
+        }
+
+
+        .gallery-item:hover .overlay {
+            transform: translateY(0);
+            opacity: 1;
+        }
+
+
+        .overlay h3 {
+            font-size: 20px;
+            margin-bottom: 5px;
+        }
+
+
+        .overlay p {
+            font-size: 13px;
+            color: #ddd;
+        }
+
+
+        /* FULLSCREEN IMAGE */
+
+        .lightbox {
+            display: none;
+
+            position: fixed;
+
+            top: 0;
+            left: 0;
+
+            width: 100%;
+            height: 100%;
+
+            background: rgba(0,0,0,0.94);
+
+            z-index: 1000;
+
+            justify-content: center;
+            align-items: center;
+
+            padding: 40px;
+        }
+
+
+        .lightbox img {
+            max-width: 90%;
+            max-height: 85vh;
+
+            border-radius: 15px;
+
+            box-shadow:
+                0 0 60px rgba(190,100,255,0.5);
+        }
+
+
+        /* CLOSE BUTTON */
+
+        .close {
+            position: absolute;
+
+            top: 25px;
+            right: 40px;
+
+            font-size: 45px;
+
+            color: white;
+
+            cursor: pointer;
+
+            transition: 0.3s;
+        }
+
+
+        .close:hover {
+            color: #ff73ce;
+            transform: scale(1.2);
+        }
+
+
+        /* FOOTER */
+
+        footer {
+            text-align: center;
+
+            padding: 25px;
+
+            color: #9585a5;
+
+            border-top:
+                1px solid rgba(255,255,255,0.08);
+        }
+
+
+        /* MOBILE */
+
+        @media (max-width: 600px) {
+
+            header h1 {
+                font-size: 34px;
+            }
+
+            .gallery {
+                width: 92%;
+                grid-template-columns: 1fr;
+            }
+
+            .gallery-item {
+                height: 270px;
+            }
+
+        }
+
+    </style>
+</head>
+
+
+<body>
+
+
+<!-- HEADER -->
+
+<header>
+
+    <h1>Dark Visions</h1>
+
+    <p>
+        A collection of mysterious places,
+        forgotten stories and haunting landscapes.
+    </p>
+
+</header>
+
+
+
+<!-- IMAGE GALLERY -->
+
+<div class="gallery">
+
+
+    <!-- IMAGE 1 -->
+
+    <div class="gallery-item"
+         onclick="openImage(this)">
+
+        <img
+        src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSv_5upi-S6oTcNdkDKth7HAve31v6zoDuSjWiIZ0ClJQ&s=10"
+        alt="Gallery Image 1">
+
+        <div class="overlay">
+
+            <h3>Lost in Darkness</h3>
+
+            <p>Mysterious places waiting to be discovered.</p>
+
+        </div>
+
+    </div>
+
+
+
+    <!-- IMAGE 2 -->
+
+    <div class="gallery-item"
+         onclick="openImage(this)">
+
+        <img
+        src="https://img.magnific.com/free-photo/haunted-house-gothic-style_23-2151626709.jpg?semt=ais_hybrid&w=740&q=80"
+        alt="Haunted Gothic House">
+
+        <div class="overlay">
+
+            <h3>The Haunted House</h3>
+
+            <p>A forgotten mansion hidden in the shadows.</p>
+
+        </div>
+
+    </div>
+
+
+
+    <!-- IMAGE 3 -->
+
+    <div class="gallery-item"
+         onclick="openImage(this)">
+
+        <img
+        src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQH5R0xGw_Cu8Or2X5hkR8r-Xt_KPcBpMKGEambCiDP4Q&s=10"
+        alt="Gallery Image 3">
+
+        <div class="overlay">
+
+            <h3>Into the Unknown</h3>
+
+            <p>Some mysteries are better left unexplained.</p>
+
+        </div>
+
+    </div>
+
+
+
+    <!-- IMAGE 4 -->
+
+    <div class="gallery-item"
+         onclick="openImage(this)">
+
+        <img
+        src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSmL97xJKZBULUmDvlsBVq-1--y4UU5MaEwT94UOaatpg&s=10"
+        alt="Gallery Image 4">
+
+        <div class="overlay">
+
+            <h3>Midnight Stories</h3>
+
+            <p>Darkness holds stories of its own.</p>
+
+        </div>
+
+    </div>
+
+
+
+    <!-- IMAGE 5 -->
+
+    <div class="gallery-item"
+         onclick="openImage(this)">
+
+        <img
+        src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTv5qSt-7-eN7kD1gousmToB7TQBHsVinei3QSkjYI-yw&s=10"
+        alt="Gallery Image 5">
+
+        <div class="overlay">
+
+            <h3>Forgotten World</h3>
+
+            <p>Memories slowly disappearing into time.</p>
+
+        </div>
+
+    </div>
+
+
+
+    <!-- IMAGE 6 -->
+
+    <div class="gallery-item"
+         onclick="openImage(this)">
+
+        <img
+        src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQ-a8Mq4W45Vr7w0Zsi28nKLIvVv_R4sD2hZbrTj_fX2A&s=10"
+        alt="Gallery Image 6">
+
+        <div class="overlay">
+
+            <h3>Silent Night</h3>
+
+            <p>Beauty hidden inside the darkness.</p>
+
+        </div>
+
+    </div>
+
+
+
+    <!-- IMAGE 7 -->
+
+    <div class="gallery-item"
+         onclick="openImage(this)">
+
+        <img
+        src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRDin2eoVcjub-Gn-5Ug-NWZsFgxvgNiBdha171zQgTNg&s=10"
+        alt="Gallery Image 7">
+
+        <div class="overlay">
+
+            <h3>Beyond Reality</h3>
+
+            <p>Where imagination meets mystery.</p>
+
+        </div>
+
+    </div>
+
+
+</div>
+
+
+
+<!-- FULL SCREEN LIGHTBOX -->
+
+<div class="lightbox" id="lightbox">
+
+    <span class="close"
+          onclick="closeImage()">
+        &times;
+    </span>
+
+    <img id="largeImage" src="" alt="Large Gallery Image">
+
+</div>
+
+
+
+<!-- FOOTER -->
+
+<footer>
+
+    <p>© 2026 Dark Visions | Image Gallery</p>
+
+</footer>
+
+
+
+<!-- JAVASCRIPT -->
+
+<script>
+
+    function openImage(element) {
+
+        const image =
+            element.querySelector("img");
+
+        const lightbox =
+            document.getElementById("lightbox");
+
+        const largeImage =
+            document.getElementById("largeImage");
+
+        largeImage.src = image.src;
+
+        lightbox.style.display = "flex";
+
+    }
+
+
+    function closeImage() {
+
+        document.getElementById("lightbox")
+            .style.display = "none";
+
+    }
+
+
+    /* Close when clicking outside image */
+
+    document.getElementById("lightbox")
+        .addEventListener("click", function(event) {
+
+            if (event.target === this) {
+                closeImage();
+            }
+
+        });
+
+
+    /* Close with ESC key */
+
+    document.addEventListener(
+        "keydown",
+        function(event) {
+
+            if (event.key === "Escape") {
+                closeImage();
+            }
+
+        }
+    );
+
+</script>
+
+
+</body>
+</html>

@@ -1,0 +1,324 @@
+```html
+// ...existing code...
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Minimalist Shop — Catalog & Cart</title>
+  <style>
+    *{box-sizing:border-box;margin:0;padding:0}
+    body{font-family:Arial,Helvetica,sans-serif;background:#f5f5f3;color:#222;min-height:100vh;display:flex;flex-direction:column}
+    header{background:#111;color:#fff;padding:18px 20px;display:flex;align-items:center;gap:20px}
+    header h1{font-size:22px;letter-spacing:3px;text-transform:uppercase}
+    .tools{margin-left:auto;display:flex;align-items:center;gap:12px}
+    .btn{background:#111;color:#fff;padding:8px 12px;border-radius:6px;text-decoration:none;border:none;cursor:pointer}
+    .badge{background:#e33;color:#fff;padding:4px 8px;border-radius:999px;font-size:13px;min-width:28px;text-align:center;display:inline-block}
+    main{width:96%;max-width:1400px;margin:28px auto;flex:1}
+    .controls{display:flex;justify-content:space-between;align-items:center;margin-bottom:18px;gap:12px}
+    .search{flex:1;display:flex;gap:8px}
+    .search input{flex:1;padding:10px;border-radius:8px;border:1px solid #ddd}
+    .filters{display:flex;gap:8px;align-items:center}
+    .product-container{display:grid;grid-template-columns:repeat(4,1fr);gap:20px}
+    .product-card{background:#fff;border-radius:12px;overflow:hidden;box-shadow:0 5px 18px rgba(0,0,0,.08);transition:transform .25s,box-shadow .25s;display:flex;flex-direction:column}
+    .product-card:hover{transform:translateY(-6px);box-shadow:0 14px 30px rgba(0,0,0,.12)}
+    .image-box{height:260px;background:#f2f2f2;overflow:hidden}
+    .image-box img{width:100%;height:100%;object-fit:cover;display:block;transition:transform .4s}
+    .product-card:hover img{transform:scale(1.05)}
+    .product-info{padding:16px;flex:1;display:flex;flex-direction:column}
+    .product-info h3{font-size:16px;margin-bottom:8px}
+    .product-info p{color:#555;font-size:13px;line-height:1.4;margin-bottom:12px;flex:1}
+    .product-meta{display:flex;justify-content:space-between;align-items:center;gap:8px}
+    .price{font-weight:700}
+    .product-actions{display:flex;gap:8px;margin-top:12px}
+    .product-actions button{flex:1;background:#111;color:#fff;padding:10px;border-radius:8px;border:none;cursor:pointer}
+    .product-actions a{display:inline-block;text-decoration:none;padding:10px;border-radius:8px;border:1px solid #ddd;color:#111;text-align:center;flex:1}
+    /* Cart drawer */
+    .cart-drawer{position:fixed;right:18px;top:70px;width:360px;max-width:90vw;background:#fff;border-radius:12px;box-shadow:0 20px 40px rgba(0,0,0,.12);overflow:hidden;transform:translateX(110%);transition:transform .28s;z-index:60}
+    .cart-drawer.open{transform:translateX(0)}
+    .cart-head{padding:14px 16px;border-bottom:1px solid #eee;display:flex;justify-content:space-between;align-items:center}
+    .cart-list{max-height:60vh;overflow:auto;padding:12px}
+    .cart-item{display:flex;gap:10px;padding:10px 0;border-bottom:1px solid #f0f0f0}
+    .cart-item img{width:64px;height:64px;object-fit:cover;border-radius:6px}
+    .cart-item-info{flex:1}
+    .cart-actions{padding:12px;border-top:1px solid #eee;display:flex;flex-direction:column;gap:10px}
+    .muted{color:#666;font-size:13px}
+    /* Support modal */
+    .modal{position:fixed;inset:0;background:rgba(0,0,0,.45);display:none;align-items:center;justify-content:center;padding:18px;z-index:70}
+    .modal.open{display:flex}
+    .modal-card{background:#fff;border-radius:10px;width:540px;max-width:98%;padding:18px}
+    .modal-card h3{margin-bottom:12px}
+    .modal-card label{display:block;font-size:13px;margin-top:8px}
+    .modal-card input,.modal-card textarea{width:100%;padding:10px;border-radius:8px;border:1px solid #ddd;margin-top:6px}
+    .row{display:flex;gap:8px}
+    /* responsive */
+    @media (max-width:1000px){.product-container{grid-template-columns:repeat(3,1fr)}}
+    @media (max-width:760px){.product-container{grid-template-columns:repeat(2,1fr)}.image-box{height:180px}}
+    @media (max-width:480px){.product-container{grid-template-columns:repeat(1,1fr)}header h1{font-size:18px}}
+    footer{padding:18px;text-align:center;color:#777;font-size:13px;border-top:1px solid #eee;background:#fff}
+  </style>
+</head>
+<body>
+
+  <header>
+    <h1>Minimalist</h1>
+    <div class="tools">
+      <button id="supportBtn" class="btn">Support</button>
+      <button id="cartToggle" class="btn">Cart <span id="cartCount" class="badge">0</span></button>
+    </div>
+  </header>
+
+  <main>
+    <section class="controls">
+      <div class="search">
+        <input id="search" placeholder="Search products, e.g. niacinamide, sunscreen..." />
+        <select id="category">
+          <option value="">All categories</option>
+          <option value="cleanser">Cleansers</option>
+          <option value="serum">Serums</option>
+          <option value="moisturizer">Moisturizers</option>
+          <option value="sunscreen">Sunscreen</option>
+        </select>
+      </div>
+      <div class="filters">
+        <span class="muted">Sort:</span>
+        <select id="sort">
+          <option value="featured">Featured</option>
+          <option value="price-asc">Price: Low → High</option>
+          <option value="price-desc">Price: High → Low</option>
+        </select>
+      </div>
+    </section>
+
+    <section id="catalog" class="product-container" aria-live="polite">
+      <!-- products rendered by JS -->
+    </section>
+  </main>
+
+  <div id="cartDrawer" class="cart-drawer" aria-hidden="true">
+    <div class="cart-head">
+      <strong>Your Cart</strong>
+      <button id="closeCart" class="btn">Close</button>
+    </div>
+    <div id="cartList" class="cart-list"></div>
+    <div class="cart-actions">
+      <div style="display:flex;justify-content:space-between;align-items:center">
+        <div class="muted">Subtotal</div>
+        <div id="cartSubtotal" style="font-weight:700">₹0</div>
+      </div>
+      <div style="display:flex;gap:8px">
+        <button id="checkoutBtn" class="btn" style="flex:1">Checkout</button>
+        <button id="clearCart" class="btn" style="background:#888">Clear</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="supportModal" class="modal" role="dialog" aria-modal="true">
+    <div class="modal-card">
+      <h3>Customer Support</h3>
+      <p class="muted">Send us a message and we'll respond to your email.</p>
+      <label>Name <input id="supName" /></label>
+      <label>Email <input id="supEmail" type="email" /></label>
+      <label>Message <textarea id="supMessage" rows="5"></textarea></label>
+      <div style="display:flex;justify-content:flex-end;gap:8px;margin-top:12px">
+        <button id="sendSupport" class="btn">Send</button>
+        <button id="closeSupport" class="btn" style="background:#888">Cancel</button>
+      </div>
+    </div>
+  </div>
+
+  <footer>© Minimalist — Demo shop. No real payments processed.</footer>
+
+  <script>
+    // Simple client-side product catalog + cart (no backend) — stores cart in localStorage
+    const PRODUCTS = [
+      { id: 'p1', title: 'Salicylic Acid + LHA 2% Cleanser', category:'cleanser', price:249, img:'/images/test_1.png', desc:'Gentle exfoliating cleanser with BHA + LHA.'},
+      { id: 'p2', title: 'SPF 50 Sunscreen', category:'sunscreen', price:499, img:'https://sfycdn.speedsize.com/56385b25-4e17-4a9a-9bec-c421c18686fb/beminimalist.co/cdn/shop/files/SPF50New.jpg?crop=center&height=540&v=1756795782&width=360', desc:'Everyday broad spectrum SPF 50.'},
+      { id: 'p3', title: 'Vitamin B5 Moisturizer', category:'moisturizer', price:399, img:'https://sfycdn.speedsize.com/56385b25-4e17-4a9a-9bec-c421c18686fb/beminimalist.co/cdn/shop/products/B5Moisturizer1200-2-min.png?crop=center&height=630&v=1756800645&width=420', desc:'Lightweight hydrating moisturizer with panthenol.'},
+      { id: 'p4', title: 'Niacinamide 10% Serum', category:'serum', price:349, img:'https://sfycdn.speedsize.com/56385b25-4e17-4a9a-9bec-c421c18686fb/beminimalist.co/cdn/shop/files/Nia10New.png?crop=center&height=1260&v=1721398127&width=840', desc:'Reduces sebum, evens skin tone.'},
+      // expanded range examples
+      { id: 'p5', title: 'Retinol 0.3% + Peptides', category:'serum', price:599, img:'https://via.placeholder.com/420x630?text=Retinol', desc:'Night serum for cellular renewal.'},
+      { id: 'p6', title: 'Hydrating Face Mist', category:'moisturizer', price:199, img:'https://via.placeholder.com/420x630?text=Face+Mist', desc:'Instant hydration and glow.'},
+      { id: 'p7', title: 'Clay Pore Mask', category:'cleanser', price:299, img:'https://via.placeholder.com/420x630?text=Clay+Mask', desc:'Deep-cleansing pore mask.'},
+      { id: 'p8', title: 'Vitamin C 10% Serum', category:'serum', price:449, img:'https://via.placeholder.com/420x630?text=Vitamin+C', desc:'Brightening & antioxidant serum.'}
+    ];
+
+    // Cart utilities
+    const CART_KEY = 'minimalist_cart_v1';
+    let cart = JSON.parse(localStorage.getItem(CART_KEY) || '{}');
+
+    function saveCart(){ localStorage.setItem(CART_KEY, JSON.stringify(cart)); updateCartUI(); }
+
+    function addToCart(id, qty=1){
+      cart[id] = (cart[id] || 0) + qty;
+      saveCart();
+      flashButton('#cartToggle');
+    }
+
+    function removeFromCart(id){ delete cart[id]; saveCart(); }
+
+    function setQty(id, qty){ if(qty<=0) removeFromCart(id); else { cart[id]=qty; saveCart(); } }
+
+    function clearCart(){ cart={}; saveCart(); }
+
+    function cartCount(){ return Object.values(cart).reduce((s,n)=>s+n,0); }
+
+    function cartSubtotal(){
+      return Object.entries(cart).reduce((sum,[id,qty])=>{
+        const p = PRODUCTS.find(x=>x.id===id);
+        return sum + (p ? p.price*qty : 0);
+      },0);
+    }
+
+    // Render catalog
+    const catalogEl = document.getElementById('catalog');
+    const searchInput = document.getElementById('search');
+    const categorySel = document.getElementById('category');
+    const sortSel = document.getElementById('sort');
+
+    function renderProducts(){
+      const q = (searchInput.value||'').toLowerCase().trim();
+      const cat = categorySel.value;
+      let list = PRODUCTS.filter(p => (!cat || p.category===cat) && (!q || (p.title+p.desc).toLowerCase().includes(q)));
+      if(sortSel.value==='price-asc') list.sort((a,b)=>a.price-b.price);
+      if(sortSel.value==='price-desc') list.sort((a,b)=>b.price-a.price);
+      catalogEl.innerHTML = '';
+      for(const p of list){
+        const card = document.createElement('article');
+        card.className = 'product-card';
+        card.innerHTML = `
+          <a href="#" class="img-link" data-id="${p.id}">
+            <div class="image-box"><img loading="lazy" src="${p.img}" alt="${escapeHtml(p.title)}"></div>
+          </a>
+          <div class="product-info">
+            <h3>${escapeHtml(p.title)}</h3>
+            <p>${escapeHtml(p.desc)}</p>
+            <div class="product-meta">
+              <div class="price">₹${p.price}</div>
+              <div class="muted">${p.category}</div>
+            </div>
+            <div class="product-actions">
+              <button class="add" data-id="${p.id}">Add to cart</button>
+              <a class="view" href="#" data-id="${p.id}">View</a>
+            </div>
+          </div>
+        `;
+        catalogEl.appendChild(card);
+      }
+    }
+
+    function escapeHtml(s){ return String(s).replace(/[&<>"']/g, c=>({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[c])); }
+
+    // Cart drawer UI
+    const cartDrawer = document.getElementById('cartDrawer');
+    const cartList = document.getElementById('cartList');
+    const cartCountEl = document.getElementById('cartCount');
+    const cartSubtotalEl = document.getElementById('cartSubtotal');
+
+    function updateCartUI(){
+      cartCountEl.textContent = String(cartCount());
+      cartSubtotalEl.textContent = '₹' + cartSubtotal();
+      cartList.innerHTML = '';
+      if(!cartCount()){
+        cartList.innerHTML = '<div class="muted" style="padding:12px">Your cart is empty.</div>';
+        return;
+      }
+      for(const [id,qty] of Object.entries(cart)){
+        const p = PRODUCTS.find(x=>x.id===id);
+        if(!p) continue;
+        const item = document.createElement('div'); item.className='cart-item';
+        item.innerHTML = `
+          <img src="${p.img}" alt="${escapeHtml(p.title)}">
+          <div class="cart-item-info">
+            <div style="display:flex;justify-content:space-between;align-items:center">
+              <strong>${escapeHtml(p.title)}</strong>
+              <div>₹${p.price*qty}</div>
+            </div>
+            <div class="muted" style="margin-top:6px">₹${p.price} × 
+              <input data-id="${id}" type="number" min="0" value="${qty}" style="width:60px;padding:6px;border-radius:6px;border:1px solid #ddd">
+              <button data-id="${id}" class="btn" style="margin-left:8px;padding:6px 8px;background:#c33">Remove</button>
+            </div>
+          </div>
+        `;
+        cartList.appendChild(item);
+      }
+    }
+
+    // Events
+    document.addEventListener('click', e=>{
+      const add = e.target.closest('button.add');
+      if(add){ e.preventDefault(); addToCart(add.dataset.id); return; }
+      const view = e.target.closest('a.view');
+      if(view){ e.preventDefault(); alert('Product details (demo): ' + view.dataset.id); return; }
+      const imgLink = e.target.closest('a.img-link');
+      if(imgLink){ e.preventDefault(); alert('Open product page (demo): '+imgLink.dataset.id); return; }
+      const removeBtn = e.target.closest('button[data-id].btn');
+      if(removeBtn && removeBtn.textContent.trim().toLowerCase()==='remove'){ removeFromCart(removeBtn.dataset.id); return;}
+    });
+
+    // Input change on cart quantity
+    cartList.addEventListener('input', e=>{
+      const input = e.target;
+      if(input && input.tagName==='INPUT' && input.type==='number' && input.dataset.id){
+        const id = input.dataset.id;
+        const qty = parseInt(input.value||'0',10);
+        setQty(id, qty);
+      }
+    });
+
+    // Drawer toggle
+    document.getElementById('cartToggle').addEventListener('click', ()=>{ cartDrawer.classList.toggle('open'); cartDrawer.setAttribute('aria-hidden', String(!cartDrawer.classList.contains('open'))); updateCartUI(); });
+    document.getElementById('closeCart').addEventListener('click', ()=>{ cartDrawer.classList.remove('open'); cartDrawer.setAttribute('aria-hidden','true'); });
+
+    document.getElementById('clearCart').addEventListener('click', ()=>{ if(confirm('Clear cart?')) clearCart(); });
+
+    document.getElementById('checkoutBtn').addEventListener('click', ()=>{
+      if(!cartCount()) return alert('Your cart is empty.');
+      // Demo checkout: open mailto with order summary (real integration required for production)
+      const lines = ['Order from Minimalist (demo):',''];
+      for(const [id,qty] of Object.entries(cart)){
+        const p = PRODUCTS.find(x=>x.id===id);
+        lines.push(`${p.title} — ${qty} × ₹${p.price} = ₹${p.price*qty}`);
+      }
+      lines.push('','Subtotal: ₹' + cartSubtotal());
+      const body = encodeURIComponent(lines.join('\\n'));
+      window.location.href = `mailto:orders@example.com?subject=Order%20Demo&body=${body}`;
+    });
+
+    // Search/filter/sort
+    [searchInput, categorySel, sortSel].forEach(el => el.addEventListener('input', renderProducts));
+
+    // Support modal
+    const supportModal = document.getElementById('supportModal');
+    document.getElementById('supportBtn').addEventListener('click', ()=> supportModal.classList.add('open'));
+    document.getElementById('closeSupport').addEventListener('click', ()=> supportModal.classList.remove('open'));
+    document.getElementById('sendSupport').addEventListener('click', ()=>{
+      const name = document.getElementById('supName').value.trim();
+      const email = document.getElementById('supEmail').value.trim();
+      const msg = document.getElementById('supMessage').value.trim();
+      if(!email || !msg) return alert('Please provide your email and message.');
+      // Save to localStorage (demo) and open mailto fallback
+      const supportKey = 'minimalist_support_messages';
+      const list = JSON.parse(localStorage.getItem(supportKey)||'[]');
+      list.push({name,email,msg,at:new Date().toISOString()});
+      localStorage.setItem(supportKey, JSON.stringify(list));
+      supportModal.classList.remove('open');
+      window.location.href = `mailto:support@example.com?subject=${encodeURIComponent('Support request from '+(name||email))}&body=${encodeURIComponent(msg)}`;
+    });
+
+    // Small UI helpers
+    function flashButton(sel){
+      const btn = document.querySelector(sel);
+      if(!btn) return;
+      btn.animate([{transform:'scale(1)'},{transform:'scale(1.07)'},{transform:'scale(1)'}],{duration:300});
+    }
+
+    // init
+    renderProducts();
+    updateCartUI();
+    // hydrate cart if localStorage has product ids not present -> ignore
+  </script>
+</body>
+</html>
+// ...existing code...
+```322222222
